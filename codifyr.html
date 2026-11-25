@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>codifyr - 포트폴리오</title>
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Pretendard/Inter 및 로고용 폰트(Montserrat) 로드 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Tailwind 커스텀 설정: 사용자 지정 메인 색상 등록
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandPink: '#e1bab3',
+                        brandGreen: '#6ebe59',
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'Inter', 'sans-serif'],
+                        logo: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 마우스를 따라다니는 부드러운 배경 글로우 효과 */
+        #cursor-glow {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(225, 186, 179, 0.28) 0%, rgba(110, 190, 89, 0.14) 45%, rgba(255, 255, 255, 0) 70%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 미세한 모눈종이 패턴 배경 */
+        .bg-grid-pattern {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(225, 186, 179, 0.14) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(225, 186, 179, 0.14) 1px, transparent 1px);
+        }
+
+        /* 둥둥 떠다니는 애니메이션 */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-white bg-grid-pattern text-neutral-800 antialiased selection:bg-[#e1bab3]/40 selection:text-neutral-900 relative overflow-x-hidden">
+
+    <!-- 마우스를 따라 움직이는 인터랙티브 배경 캔버스 및 글로우 -->
+    <canvas id="interactive-bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+    <div id="cursor-glow" class="hidden md:block"></div>
+
+    <!-- 상단 네비게이션 바 -->
+    <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-neutral-100">
+        <div class="max-w-4xl mx-auto px-6 h-24 flex items-center justify-between">
+            <!-- 첨부 이미지 로고를 조금 더 크게 배치한 인라인 SVG 로고 -->
+            <a href="#" class="flex items-center group focus:outline-none" aria-label="codifyr 홈으로 이동">
+                <svg class="h-12 md:h-14 w-auto transition-transform duration-200 group-hover:scale-105" viewBox="0 0 360 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 둥근 사각형 아이콘 배경 (#e1bab3) -->
+                    <rect x="4" y="10" width="80" height="80" rx="18" fill="#e1bab3"/>
+                    <!-- 왼쪽 중괄호 { -->
+                    <path d="M31 32C25.5 32 24 34.5 24 39V44.5C24 47.5 21.5 49.5 18.5 50C21.5 50.5 24 52.5 24 55.5V61C24 65.5 25.5 68 31 68" stroke="white" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- 가운데 슬래시 / -->
+                    <path d="M48 31L40 69" stroke="white" stroke-width="6.5" stroke-linecap="round"/>
+                    <!-- 오른쪽 중괄호 } -->
+                    <path d="M57 32C62.5 32 64 34.5 64 39V44.5C64 47.5 66.5 49.5 69.5 50C66.5 50.5 64 52.5 64 55.5V61C64 65.5 62.5 68 57 68" stroke="white" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    
+                    <!-- 텍스트: Cod (분홍빛 베이지 #e1bab3) -->
+                    <text x="104" y="71" fill="#e1bab3" font-family="Montserrat, sans-serif" font-weight="800" font-size="56" letter-spacing="-1.5">Cod</text>
+                    
+                    <!-- 텍스트: i (기둥은 #e1bab3, 점은 #6ebe59) -->
+                    <rect x="223" y="38" width="10.5" height="33" rx="1.5" fill="#e1bab3"/>
+                    <rect x="223" y="23" width="10.5" height="9.5" rx="1.5" fill="#6ebe59"/>
+                    
+                    <!-- 텍스트: f (분홍빛 베이지 #e1bab3) -->
+                    <text x="241" y="71" fill="#e1bab3" font-family="Montserrat, sans-serif" font-weight="800" font-size="56" letter-spacing="-1">f</text>
+                    
+                    <!-- 텍스트: y (왼쪽 짧은 획은 #e1bab3, 오른쪽 긴 대각선 획은 #6ebe59) -->
+                    <path d="M266 38H277.5L286.5 60L281.5 71L266 38Z" fill="#e1bab3"/>
+                    <path d="M294.5 38H306L284.5 86H273L294.5 38Z" fill="#6ebe59"/>
+                    
+                    <!-- 텍스트: r (분홍빛 베이지 #e1bab3) -->
+                    <text x="310" y="71" fill="#e1bab3" font-family="Montserrat, sans-serif" font-weight="800" font-size="56">r</text>
+                </svg>
+            </a>
+
+            <!-- 데스크톱 내비게이션 메뉴 -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-neutral-600">
+                <a href="#about" class="hover:text-[#6ebe59] transition-colors">소개</a>
+                <a href="#skills" class="hover:text-[#6ebe59] transition-colors">기술</a>
+                <a href="#projects" class="hover:text-[#6ebe59] transition-colors">프로젝트</a>
+                <a href="#plans" class="hover:text-[#6ebe59] transition-colors">진행 중 · 앞으로의 계획</a>
+                <a href="#contact" class="px-4 py-2 rounded-full bg-[#e1bab3]/30 text-neutral-800 hover:bg-[#e1bab3]/60 transition-colors">연락처</a>
+            </nav>
+
+            <!-- 모바일 메뉴 버튼 -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl text-neutral-600 hover:bg-neutral-100 focus:outline-none" aria-label="메뉴 열기">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 모바일 드롭다운 메뉴 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-neutral-100 px-6 py-4 space-y-3 text-sm font-medium text-neutral-600">
+            <a href="#about" class="block py-2 hover:text-[#6ebe59]">소개</a>
+            <a href="#skills" class="block py-2 hover:text-[#6ebe59]">기술</a>
+            <a href="#projects" class="block py-2 hover:text-[#6ebe59]">프로젝트</a>
+            <a href="#plans" class="block py-2 hover:text-[#6ebe59]">진행 중 · 앞으로의 계획</a>
+            <a href="#contact" class="block py-2 text-[#6ebe59] font-semibold">연락처</a>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="relative z-10 max-w-4xl mx-auto px-6 py-12 md:py-20 space-y-24">
+
+        <!-- 1. 소개 섹션 (브랜드명 크게 강조 + 한 줄 소개와 통합 + 코드/노드 그래픽 추가) -->
+        <section id="about" class="scroll-mt-28">
+            <div class="bg-white/90 backdrop-blur-sm border-2 border-[#e1bab3]/70 rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    <!-- 왼쪽 텍스트 영역 -->
+                    <div class="lg:col-span-7">
+                        <div class="w-16 h-1.5 rounded-full bg-[#6ebe59] mb-5"></div>
+                        
+                        <!-- 크게 강조된 브랜드명 -->
+                        <div class="mb-4">
+                            <span class="font-logo font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-[#e1bab3]">
+                                cod<span class="text-[#6ebe59]">i</span>f<span class="text-[#6ebe59]">y</span>r
+                            </span>
+                        </div>
+
+                        <!-- 브랜드명이 함께 어우러진 한 줄 소개 -->
+                        <h1 class="text-xl sm:text-2xl md:text-[26px] font-bold text-neutral-900 leading-snug mb-8">
+                            <span class="text-[#6ebe59] font-logo font-extrabold">codifyr</span> · 한신대학교 ai.sw를 전공하는 대학생
+                        </h1>
+
+                        <div class="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#e1bab3]/20 border border-[#e1bab3]/50">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#6ebe59]"></span>
+                            <span class="text-sm font-semibold text-neutral-600">전공 · 관심 분야</span>
+                            <span class="text-neutral-300">|</span>
+                            <span class="text-base font-bold text-neutral-900">프로그래밍</span>
+                        </div>
+                    </div>
+
+                    <!-- 오른쪽: AI.SW & 프로그래밍을 상징하는 추상 노드/코드 다이어그램 그래픽 -->
+                    <div class="lg:col-span-5 flex justify-center">
+                        <div class="w-full max-w-[260px] p-5 rounded-3xl bg-neutral-50/90 border border-[#e1bab3]/40 animate-float">
+                            <svg viewBox="0 0 220 180" class="w-full h-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- 연결선 (네트워크 그래프) -->
+                                <line x1="50" y1="45" x2="110" y2="90" stroke="#e1bab3" stroke-width="2.5" stroke-dasharray="4 4"/>
+                                <line x1="170" y1="45" x2="110" y2="90" stroke="#6ebe59" stroke-width="2.5"/>
+                                <line x1="50" y1="135" x2="110" y2="90" stroke="#6ebe59" stroke-width="2.5"/>
+                                <line x1="170" y1="135" x2="110" y2="90" stroke="#e1bab3" stroke-width="2.5" stroke-dasharray="4 4"/>
+                                <line x1="50" y1="45" x2="170" y2="45" stroke="#e1bab3" stroke-width="1.5" opacity="0.6"/>
+                                <line x1="50" y1="135" x2="170" y2="135" stroke="#e1bab3" stroke-width="1.5" opacity="0.6"/>
+
+                                <!-- 중앙 메인 허브 노드 (codifyr 상징) -->
+                                <rect x="82" y="62" width="56" height="56" rx="16" fill="#e1bab3"/>
+                                <text x="110" y="96" text-anchor="middle" fill="white" font-family="Montserrat, sans-serif" font-weight="800" font-size="20">{/}</text>
+
+                                <!-- 외곽 노드 4개 -->
+                                <circle cx="50" cy="45" r="16" fill="white" stroke="#e1bab3" stroke-width="3"/>
+                                <text x="50" y="49" text-anchor="middle" fill="#525252" font-family="Montserrat, sans-serif" font-weight="700" font-size="10">AI</text>
+
+                                <circle cx="170" cy="45" r="16" fill="white" stroke="#6ebe59" stroke-width="3"/>
+                                <text x="170" y="49" text-anchor="middle" fill="#6ebe59" font-family="Montserrat, sans-serif" font-weight="700" font-size="10">SW</text>
+
+                                <circle cx="50" cy="135" r="16" fill="white" stroke="#6ebe59" stroke-width="3"/>
+                                <text x="50" y="139" text-anchor="middle" fill="#6ebe59" font-family="Montserrat, sans-serif" font-weight="700" font-size="10">Py</text>
+
+                                <circle cx="170" cy="135" r="16" fill="white" stroke="#e1bab3" stroke-width="3"/>
+                                <text x="170" y="139" text-anchor="middle" fill="#525252" font-family="Montserrat, sans-serif" font-weight="700" font-size="9">HTML</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 기술 섹션 (기술 카드 + 시각적 스택 차트 그래픽) -->
+        <section id="skills" class="scroll-mt-28">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="w-3 h-3 rounded-full bg-[#e1bab3]"></span>
+                <h2 class="text-2xl font-bold text-neutral-900">기술</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                <!-- 왼쪽: 기술 카드 2개 -->
+                <div class="md:col-span-7 flex flex-col justify-between gap-5">
+                    <!-- 파이썬 카드 -->
+                    <div class="group p-6 rounded-3xl bg-white/95 border border-neutral-200 hover:border-[#e1bab3] transition-all shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-5">
+                            <div class="w-14 h-14 rounded-2xl bg-[#e1bab3]/25 flex items-center justify-center text-neutral-800 font-bold text-lg group-hover:bg-[#e1bab3] group-hover:text-white transition-colors">
+                                Py
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-neutral-900">파이썬</h3>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-logo font-bold bg-[#e1bab3]/20 text-neutral-700">Python</span>
+                    </div>
+
+                    <!-- HTML 카드 -->
+                    <div class="group p-6 rounded-3xl bg-white/95 border border-neutral-200 hover:border-[#6ebe59] transition-all shadow-sm flex items-center justify-between">
+                        <div class="flex items-center gap-5">
+                            <div class="w-14 h-14 rounded-2xl bg-[#6ebe59]/15 flex items-center justify-center text-[#6ebe59] font-bold text-base group-hover:bg-[#6ebe59] group-hover:text-white transition-colors">
+                                &lt;/&gt;
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-neutral-900">html</h3>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-logo font-bold bg-[#6ebe59]/15 text-[#6ebe59]">HTML</span>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 보유 기술 구성 도넛/바 차트 그래픽 (임의 수치 없이 구성 요소만 시각화) -->
+                <div class="md:col-span-5 p-6 rounded-3xl bg-white/95 border border-neutral-200 shadow-sm flex flex-col items-center justify-center">
+                    <svg viewBox="0 0 200 150" class="w-full max-w-[210px] h-auto" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 반원형 아치 그래프 -->
+                        <path d="M 30 110 A 70 70 0 0 1 100 40" fill="none" stroke="#e1bab3" stroke-width="18" stroke-linecap="round"/>
+                        <path d="M 100 40 A 70 70 0 0 1 170 110" fill="none" stroke="#6ebe59" stroke-width="18" stroke-linecap="round"/>
+                        
+                        <!-- 중앙 아이콘 -->
+                        <circle cx="100" cy="105" r="24" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1.5"/>
+                        <text x="100" y="109" text-anchor="middle" fill="#404040" font-family="Montserrat, sans-serif" font-weight="800" font-size="11">STACK</text>
+
+                        <!-- 범례 라벨 -->
+                        <circle cx="52" cy="136" r="5" fill="#e1bab3"/>
+                        <text x="63" y="140" fill="#404040" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="11">파이썬</text>
+
+                        <circle cx="122" cy="136" r="5" fill="#6ebe59"/>
+                        <text x="133" y="140" fill="#404040" font-family="Noto Sans KR, sans-serif" font-weight="700" font-size="11">html</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 프로젝트 섹션 (AI 웹툰 제작 흐름도 그래픽 추가) -->
+        <section id="projects" class="scroll-mt-28">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="w-3 h-3 rounded-full bg-[#6ebe59]"></span>
+                <h2 class="text-2xl font-bold text-neutral-900">프로젝트</h2>
+            </div>
+
+            <div class="p-8 rounded-3xl bg-white/95 border border-neutral-200 hover:border-[#e1bab3] transition-all shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-[#e1bab3]/30 flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-neutral-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl md:text-2xl font-bold text-neutral-900">ai를 활용하여 웹툰 만들기</h3>
+                    </div>
+                    <span class="inline-block self-start sm:self-center px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#6ebe59]/15 text-[#6ebe59]">
+                        PROJECT
+                    </span>
+                </div>
+
+                <!-- 프로젝트 개념 일러스트 (AI + 웹툰 컷 프레임 다이어그램) -->
+                <div class="p-5 rounded-2xl bg-neutral-50 border border-neutral-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                        <!-- AI 블록 -->
+                        <div class="p-4 rounded-2xl bg-white border border-[#e1bab3]/60 flex items-center justify-center gap-3">
+                            <span class="w-8 h-8 rounded-xl bg-[#e1bab3] text-white font-logo font-bold text-xs flex items-center justify-center">AI</span>
+                            <span class="font-bold text-sm text-neutral-800">AI 활용</span>
+                        </div>
+
+                        <!-- 연결 화살표 그래픽 -->
+                        <div class="flex items-center justify-center">
+                            <svg class="w-16 h-6 text-[#6ebe59] rotate-90 sm:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 64 24">
+                                <line x1="4" y1="12" x2="54" y2="12" stroke-width="2.5" stroke-dasharray="4 4"/>
+                                <path d="M48 6L56 12L48 18" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+
+                        <!-- 웹툰 프레임 일러스트 블록 -->
+                        <div class="p-4 rounded-2xl bg-white border border-[#6ebe59]/50 flex items-center justify-center gap-3">
+                            <svg class="w-8 h-8 text-[#6ebe59]" viewBox="0 0 32 32" fill="none">
+                                <rect x="3" y="4" width="11" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <rect x="18" y="4" width="11" height="24" rx="2" fill="#e1bab3" fill-opacity="0.35" stroke="currentColor" stroke-width="2"/>
+                                <rect x="3" y="18" width="11" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <span class="font-bold text-sm text-neutral-800">웹툰 만들기</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 진행 중 · 앞으로의 계획 섹션 (타임라인 연결 그래픽 추가) -->
+        <section id="plans" class="scroll-mt-28">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="w-3 h-3 rounded-full bg-[#e1bab3]"></span>
+                <h2 class="text-2xl font-bold text-neutral-900">진행 중 · 앞으로의 계획</h2>
+            </div>
+
+            <!-- 로드맵 진행 바 시각화 -->
+            <div class="mb-6 px-2 hidden md:flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full bg-[#e1bab3] ring-4 ring-[#e1bab3]/30"></span>
+                    <span class="text-xs font-bold text-neutral-600">NOW</span>
+                </div>
+                <div class="flex-1 h-1 mx-4 rounded-full bg-gradient-to-r from-[#e1bab3] to-[#6ebe59]"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-[#6ebe59]">NEXT</span>
+                    <span class="w-4 h-4 rounded-full bg-[#6ebe59] ring-4 ring-[#6ebe59]/25"></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 현재 진행 중 -->
+                <div class="p-7 rounded-3xl bg-[#e1bab3]/15 border border-[#e1bab3]/60 flex flex-col justify-between backdrop-blur-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-white text-neutral-800 border border-[#e1bab3]">
+                                현재 진행 중
+                            </span>
+                            <!-- GitHub 브랜치 아이콘 그래픽 -->
+                            <svg class="w-6 h-6 text-neutral-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="6" cy="6" r="2.5" stroke-width="2"/>
+                                <circle cx="18" cy="18" r="2.5" stroke-width="2"/>
+                                <circle cx="6" cy="18" r="2.5" stroke-width="2"/>
+                                <path d="M6 8.5V15.5M8.5 6H13C15.5 6 18 8.5 18 11V15.5" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold text-neutral-900">
+                            깃허브 사이트 제작
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- 앞으로의 계획 -->
+                <div class="p-7 rounded-3xl bg-[#6ebe59]/10 border border-[#6ebe59]/40 flex flex-col justify-between backdrop-blur-sm">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-white text-[#6ebe59] border border-[#6ebe59]/40">
+                                앞으로의 계획
+                            </span>
+                            <!-- 웹사이트 브라우저 그래픽 -->
+                            <svg class="w-6 h-6 text-[#6ebe59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="16" rx="3" stroke-width="2"/>
+                                <line x1="3" y1="9" x2="21" y2="9" stroke-width="2"/>
+                                <circle cx="6.5" cy="6.5" r="0.8" fill="currentColor"/>
+                                <circle cx="9.5" cy="6.5" r="0.8" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg md:text-xl font-bold text-neutral-900 leading-relaxed">
+                            프로그래밍과 개발을 통해 나만의 웹사이트 만들기
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 연락처 섹션 -->
+        <section id="contact" class="scroll-mt-28">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="w-3 h-3 rounded-full bg-[#6ebe59]"></span>
+                <h2 class="text-2xl font-bold text-neutral-900">연락처</h2>
+            </div>
+
+            <div class="p-8 rounded-3xl bg-white/95 border-2 border-[#e1bab3]/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#6ebe59]/15 flex items-center justify-center text-[#6ebe59] shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-neutral-500">연락 방법</p>
+                        <p class="text-xl font-bold text-neutral-900">이메일</p>
+                    </div>
+                </div>
+
+                <!-- 이메일 안내 메시지 박스 트리거 버튼 -->
+                <button id="email-action-btn" type="button" class="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#e1bab3] hover:bg-[#d5aba3] text-neutral-900 font-bold text-sm transition-colors cursor-pointer">
+                    이메일로 연락하기
+                </button>
+            </div>
+
+            <!-- 알림 메시지 박스 -->
+            <div id="message-box" class="hidden mt-4 p-4 rounded-2xl bg-[#6ebe59]/15 border border-[#6ebe59]/40 text-sm text-neutral-800 flex items-center justify-between">
+                <span>연락 방법: <strong>이메일</strong> (이메일 주소를 입력하여 연결할 수 있습니다.)</span>
+                <button id="close-msg-btn" type="button" class="text-neutral-500 hover:text-neutral-900 font-bold px-2">✕</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="relative z-10 border-t border-neutral-100 bg-white/80 backdrop-blur-sm py-10 mt-12">
+        <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-neutral-500">
+            <span class="font-logo font-extrabold text-xl text-[#e1bab3]">cod<span class="text-[#6ebe59]">i</span>f<span class="text-[#6ebe59]">y</span>r</span>
+            <span>한신대학교 ai.sw를 전공하는 대학생</span>
+        </div>
+    </footer>
+
+    <!-- 인터랙션 및 마우스 추적 배경 스크립트 -->
+    <script>
+        // 1. 모바일 내비게이션 토글
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
+
+        // 2. 이메일 버튼 클릭 시 커스텀 메시지 박스 표시
+        const emailActionBtn = document.getElementById('email-action-btn');
+        const messageBox = document.getElementById('message-box');
+        const closeMsgBtn = document.getElementById('close-msg-btn');
+
+        if (emailActionBtn && messageBox) {
+            emailActionBtn.addEventListener('click', () => {
+                messageBox.classList.remove('hidden');
+            });
+        }
+
+        if (closeMsgBtn && messageBox) {
+            closeMsgBtn.addEventListener('click', () => {
+                messageBox.classList.add('hidden');
+            });
+        }
+
+        // 3. 마우스를 따라 움직이는 부드러운 글로우 & 인터랙티브 노드(파티클) 배경 효과
+        const cursorGlow = document.getElementById('cursor-glow');
+        const canvas = document.getElementById('interactive-bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2, active: false };
+        let glowPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.min(Math.floor((canvas.width * canvas.height) / 28000), 45);
+            const colors = ['#e1bab3', '#6ebe59'];
+
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.45,
+                    vy: (Math.random() - 0.5) * 0.45,
+                    radius: Math.random() * 2.5 + 1.8,
+                    color: colors[i % 2]
+                });
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.active = true;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+                mouse.active = true;
+            }
+        }, { passive: true });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        function animateBackground() {
+            // 글로우 부드럽게 마우스 추적 (Lerp)
+            glowPos.x += (mouse.x - glowPos.x) * 0.12;
+            glowPos.y += (mouse.y - glowPos.y) * 0.12;
+            if (cursorGlow) {
+                cursorGlow.style.left = `${glowPos.x}px`;
+                cursorGlow.style.top = `${glowPos.y}px`;
+            }
+
+            // 캔버스 파티클 및 마우스 연결선 그리기
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // 화면 경계 반사
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                // 마우스 근처에 있을 때 살짝 끌려오며 선으로 연결
+                const dxMouse = mouse.x - p.x;
+                const dyMouse = mouse.y - p.y;
+                const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+
+                if (mouse.active && distMouse < 180) {
+                    p.x += dxMouse * 0.008;
+                    p.y += dyMouse * 0.008;
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = p.color === '#6ebe59'
+                        ? `rgba(110, 190, 89, ${(1 - distMouse / 180) * 0.35})`
+                        : `rgba(225, 186, 179, ${(1 - distMouse / 180) * 0.45})`;
+                    ctx.lineWidth = 1.2;
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+
+                // 파티클 점 그리기
+                ctx.beginPath();
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = 0.55;
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                // 파티클 간 가까운 거리 연결선
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(225, 186, 179, ${(1 - dist / 120) * 0.22})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateBackground);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            animateBackground();
+        };
+    </script>
+</body>
+</html>
